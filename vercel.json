@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "env": {
+    "SUPABASE_URL": "https://cwnvvdxwwvrfxoudcaag.supabase.co",
+    "SUPABASE_ANON_KEY": "sb_publishable_KgXR0y-99KEHPy0MaPoB6A_Nf4eCSDd"
+  }
+}
