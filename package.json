@@ -1,8 +1,9 @@
 {
-  "name": "massdwell-cogs",
-  "version": "1.0.0",
+  "name": "massdwell-cogs-enhanced",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
+  "description": "Enhanced COGS Calculator with variance tracking and analytics",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
