@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+// Environment variables with fallbacks
+const supabaseUrl = process.env.SUPABASE_URL || 'https://cwnvvdxwwvrfxoudcaag.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bnZ2ZHh3d3ZyZnhvdWRjYWFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY4OTMzOTcsImV4cCI6MjAyMjQ2OTM5N30.sb_publishable_KgXR0y-99KEHPy0MaPoB6A_Nf4eCSDd';
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default async function handler(req, res) {
   // Enable CORS
