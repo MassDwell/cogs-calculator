@@ -3,41 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MassDwell COGS Calculator - Enhanced</title>
+    <title>MassDwell COGS Calculator - Complete Backend System</title>
     <script>
-        // Redirect to enhanced calculator
-        window.location.href = '/enhanced-calculator.html';
+        // Redirect to complete enhanced calculator
+        window.location.href = '/complete-enhanced-calculator.html';
     </script>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
             text-align: center; 
             padding: 50px; 
-            background: #f9fafb; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            max-width: 600px;
         }
         .loading { 
             font-size: 18px; 
-            color: #6b7280; 
+            margin-bottom: 20px;
         }
         .enhanced-notice {
-            background: #3b82f6;
             color: white;
+            margin: 20px 0;
+        }
+        .enhanced-notice h2 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 800;
+        }
+        .enhanced-notice p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        .features {
+            text-align: left;
+            margin: 24px 0;
+            background: rgba(255,255,255,0.1);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .features h3 {
+            margin-bottom: 16px;
+            color: #fbbf24;
+        }
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        .features li {
+            margin: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        .features li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #fbbf24;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             margin: 20px auto;
-            max-width: 600px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="enhanced-notice">
-        <h2>🚀 Enhanced COGS Calculator Loading...</h2>
-        <p>Redirecting to the new profit optimization engine with variance tracking, analytics, and margin intelligence.</p>
+    <div class="loading-container">
+        <div class="enhanced-notice">
+            <h2>🚀 Enhanced COGS Calculator Loading...</h2>
+            <p>Initializing complete backend cost tracking & profit optimization engine...</p>
+        </div>
+
+        <div class="features">
+            <h3>🎯 What's New in This Version:</h3>
+            <ul>
+                <li>Actual vs Estimated cost tracking with variance analysis</li>
+                <li>Color-coded variance alerts (green/yellow/red)</li>
+                <li>Historical cost database with supplier performance</li>
+                <li>Profit margin intelligence with target alerts</li>
+                <li>Team cost input workflow for field updates</li>
+                <li>Advanced analytics dashboard</li>
+                <li>Material price trending and forecasting</li>
+                <li>Project profitability analysis by model</li>
+                <li>Real-time collaboration features</li>
+                <li>Enhanced project management system</li>
+            </ul>
+        </div>
+
+        <div class="spinner"></div>
+        <div class="loading">Loading profit optimization engine...</div>
+        <div style="font-size: 14px; opacity: 0.8;">
+            If you're not redirected, <a href="/complete-enhanced-calculator.html">click here</a>
+        </div>
     </div>
-    <div class="loading">If you're not redirected, <a href="/enhanced-calculator.html">click here</a></div>
     
     <noscript>
-        <meta http-equiv="refresh" content="0; url=/enhanced-calculator.html">
+        <meta http-equiv="refresh" content="0; url=/complete-enhanced-calculator.html">
     </noscript>
 </body>
 </html>
