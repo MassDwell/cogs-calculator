@@ -1,8 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "framework": null,
   "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/enhanced-calculator.html", "destination": "/enhanced-calculator.html" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "headers": [
@@ -15,9 +17,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "SUPABASE_URL": "https://cwnvvdxwwvrfxoudcaag.supabase.co",
-    "SUPABASE_ANON_KEY": "sb_publishable_KgXR0y-99KEHPy0MaPoB6A_Nf4eCSDd"
-  }
+  ]
 }
