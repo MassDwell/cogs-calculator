@@ -1445,7 +1445,8 @@
                         category: 'Outdoor',
                         leadTime: 7
                     }
-                } : {}
+                } : {},
+                miscellaneous: {}
             };
         };
 
@@ -1462,6 +1463,7 @@
             insulation: '🧤 Insulation',
             deck: '🌳 Deck',
             sitework: '🚜 Site Work',
+            miscellaneous: '📝 Miscellaneous',
         };
 
         const PROJECT_STATUSES = {
@@ -1528,6 +1530,9 @@
             const [customBeds, setCustomBeds] = useState(2);
             const [customBaths, setCustomBaths] = useState(1);
             const [customPrice, setCustomPrice] = useState(180000);
+            
+            // Miscellaneous items state
+            const [miscItems, setMiscItems] = useState([]);
 
             // Historical data simulation
             const [historicalProjects, setHistoricalProjects] = useState(mockHistoricalProjects);
@@ -1628,6 +1633,96 @@
                 }
             }, [selectedModel]);
 
+            // Miscellaneous item handlers
+            const addMiscItem = useCallback(() => {
+                const newItem = {
+                    id: Date.now(),
+                    name: '',
+                    description: '',
+                    value: 0,
+                    actualValue: null
+                };
+                setMiscItems(prev => [...prev, newItem]);
+                
+                // Update costs with new misc item
+                setCosts(prev => ({
+                    ...prev,
+                    miscellaneous: {
+                        ...prev.miscellaneous,
+                        [`misc_${newItem.id}`]: {
+                            value: 0,
+                            actualValue: null,
+                            min: 0,
+                            max: 50000,
+                            unit: 'Custom miscellaneous item',
+                            name: 'New Misc Item',
+                            category: 'Miscellaneous',
+                            leadTime: 0
+                        }
+                    }
+                }));
+            }, []);
+
+            const removeMiscItem = useCallback((itemId) => {
+                setMiscItems(prev => prev.filter(item => item.id !== itemId));
+                
+                // Remove from costs
+                setCosts(prev => {
+                    const newCosts = { ...prev };
+                    delete newCosts.miscellaneous[`misc_${itemId}`];
+                    return newCosts;
+                });
+                
+                setAlerts(prev => [...prev, {
+                    id: Date.now(),
+                    type: 'success',
+                    message: 'Miscellaneous item removed'
+                }]);
+            }, []);
+
+            const updateMiscItem = useCallback((itemId, field, value) => {
+                setMiscItems(prev => prev.map(item => 
+                    item.id === itemId ? { ...item, [field]: value } : item
+                ));
+
+                // Update costs
+                if (field === 'value' || field === 'actualValue' || field === 'name') {
+                    setCosts(prev => ({
+                        ...prev,
+                        miscellaneous: {
+                            ...prev.miscellaneous,
+                            [`misc_${itemId}`]: {
+                                ...prev.miscellaneous[`misc_${itemId}`],
+                                [field === 'name' ? 'name' : field]: field === 'name' ? value : (parseInt(value) || 0)
+                            }
+                        }
+                    }));
+                }
+            }, []);
+
+            // Update costs when misc items change
+            useEffect(() => {
+                setCosts(prev => {
+                    const newMiscCosts = {};
+                    miscItems.forEach(item => {
+                        newMiscCosts[`misc_${item.id}`] = {
+                            value: item.value || 0,
+                            actualValue: item.actualValue,
+                            min: 0,
+                            max: 50000,
+                            unit: item.description || 'Miscellaneous item',
+                            name: item.name || 'Misc Item',
+                            category: 'Miscellaneous',
+                            leadTime: 0
+                        };
+                    });
+                    return {
+                        ...prev,
+                        miscellaneous: newMiscCosts
+                    };
+                });
+            }, [miscItems]);
+
             // Calculate comprehensive totals
             const totals = useMemo(() => {
                 const categoryTotals = {};
@@ -1678,7 +1773,7 @@
                         )
                     )
                 };
-            }, [costs, includeDeck]);
+            }, [costs, includeDeck, miscItems]);
 
             // Margin calculations
             const margin = listPrice - totals.actualGrandTotal;
@@ -1748,7 +1843,9 @@
                             customBeds,
                             customBaths,
                             customPrice
-                        })
+                        }),
+                        // Save miscellaneous items
+                        miscItems
                     };
 
                     if (currentProjectId) {
@@ -1798,6 +1895,11 @@
                     setCustomBeds(project.customBeds);
                     setCustomBaths(project.customBaths);
                     setCustomPrice(project.customPrice);
+                }
+                
+                // Load miscellaneous items if they exist
+                if (project.miscItems && Array.isArray(project.miscItems)) {
+                    setMiscItems(project.miscItems);
                 }
                 
                 setAlerts(prev => [...prev, {
@@ -1981,7 +2083,7 @@
                 <div className="cost-grid">
                     {Object.entries(costs).map(([category, items]) => {
                         if (category === 'deck' && !includeDeck) return null;
-                        if (!items || Object.keys(items).length === 0) return null;
+                        if (!items || (Object.keys(items).length === 0 && category !== 'miscellaneous')) return null;
 
                         const categoryVariance = totals.categoryTotals[category] > 0 
                             ? ((totals.actualCategoryTotals[category] - totals.categoryTotals[category]) / totals.categoryTotals[category] * 100)
@@ -2001,84 +2103,191 @@
                                     <div className="category-total">
                                         {formatCurrency(totals.actualCategoryTotals[category] || 0)}
                                     </div>
+                                    {category === 'miscellaneous' && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <button
+                                                onClick={addMiscItem}
+                                                style={{
+                                                    background: '#3b82f6',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '8px 16px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '12px',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    marginLeft: '16px'
+                                                }}
+                                            >
+                                                + Add Misc Item
+                                            </button>
+                                            <span style={{ fontSize: '11px', color: '#6b7280', fontStyle: 'italic' }}>
+                                                Add permit fees, special materials, unexpected costs, etc.
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div className="cost-items">
-                                    {Object.entries(items).map(([key, item]) => {
-                                        const variance = item.actualValue && item.value 
-                                            ? ((item.actualValue - item.value) / item.value * 100)
-                                            : 0;
-                                        const hasActual = item.actualValue !== null && item.actualValue !== undefined;
+                                    {category === 'miscellaneous' ? (
+                                        // Special rendering for miscellaneous items
+                                        miscItems.map(miscItem => {
+                                            const item = items[`misc_${miscItem.id}`] || {};
+                                            const variance = item.actualValue && item.value 
+                                                ? ((item.actualValue - item.value) / item.value * 100)
+                                                : 0;
+                                            const hasActual = item.actualValue !== null && item.actualValue !== undefined;
 
-                                        return (
-                                            <div 
-                                                key={key} 
-                                                className={`cost-item ${hasActual ? 'has-variance' : ''} ${getVarianceAlert(variance)}`}
-                                            >
-                                                <div className="item-info">
-                                                    <div className="item-name">{item.name}</div>
-                                                    <div className="item-unit">{item.unit}</div>
-                                                    {item.supplier && (
-                                                        <div className="supplier-info">
-                                                            {item.supplier.name} ({item.supplier.reliability}% reliability)
+                                            return (
+                                                <div 
+                                                    key={`misc_${miscItem.id}`}
+                                                    className={`cost-item ${hasActual ? 'has-variance' : ''} ${getVarianceAlert(variance)}`}
+                                                    style={{ background: '#f8fafc' }}
+                                                >
+                                                    <div className="item-info" style={{ flex: '2' }}>
+                                                        <input
+                                                            type="text"
+                                                            value={miscItem.name}
+                                                            onChange={(e) => updateMiscItem(miscItem.id, 'name', e.target.value)}
+                                                            className="cost-input"
+                                                            placeholder="Item name (e.g., Permit fees, Special materials)"
+                                                            style={{ marginBottom: '6px', fontSize: '14px', fontWeight: '600' }}
+                                                        />
+                                                        <input
+                                                            type="text"
+                                                            value={miscItem.description}
+                                                            onChange={(e) => updateMiscItem(miscItem.id, 'description', e.target.value)}
+                                                            className="cost-input"
+                                                            placeholder="Description/notes"
+                                                            style={{ fontSize: '12px', color: '#6b7280' }}
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <input
+                                                            type="number"
+                                                            value={miscItem.value || 0}
+                                                            onChange={(e) => updateMiscItem(miscItem.id, 'value', e.target.value)}
+                                                            className="cost-input"
+                                                            placeholder="Estimated"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <input
+                                                            type="number"
+                                                            value={miscItem.actualValue || ''}
+                                                            onChange={(e) => updateMiscItem(miscItem.id, 'actualValue', e.target.value)}
+                                                            className={`cost-input ${hasActual ? 'has-actual' : ''}`}
+                                                            placeholder="Actual"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div className="variance-display">
+                                                        {hasActual && variance !== 0 && (
+                                                            <div className={`variance-${variance > 0 ? 'positive' : 'negative'}`}>
+                                                                {variance > 0 ? '+' : ''}{variance.toFixed(1)}%
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                        <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                            {formatCurrency(miscItem.value || 0)}
                                                         </div>
-                                                    )}
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <button 
+                                                            className="action-btn"
+                                                            onClick={() => removeMiscItem(miscItem.id)}
+                                                            style={{ color: '#ef4444', fontSize: '16px' }}
+                                                            title="Remove this miscellaneous item"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                
-                                                <div>
-                                                    <input
-                                                        type="number"
-                                                        value={item.value || 0}
-                                                        onChange={(e) => handleCostChange(category, key, 'value', e.target.value)}
-                                                        className="cost-input"
-                                                        placeholder="Estimated"
-                                                    />
+                                            );
+                                        })
+                                    ) : (
+                                        // Normal rendering for other categories
+                                        Object.entries(items).map(([key, item]) => {
+                                            const variance = item.actualValue && item.value 
+                                                ? ((item.actualValue - item.value) / item.value * 100)
+                                                : 0;
+                                            const hasActual = item.actualValue !== null && item.actualValue !== undefined;
+
+                                            return (
+                                                <div 
+                                                    key={key} 
+                                                    className={`cost-item ${hasActual ? 'has-variance' : ''} ${getVarianceAlert(variance)}`}
+                                                >
+                                                    <div className="item-info">
+                                                        <div className="item-name">{item.name}</div>
+                                                        <div className="item-unit">{item.unit}</div>
+                                                        {item.supplier && (
+                                                            <div className="supplier-info">
+                                                                {item.supplier.name} ({item.supplier.reliability}% reliability)
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <input
+                                                            type="number"
+                                                            value={item.value || 0}
+                                                            onChange={(e) => handleCostChange(category, key, 'value', e.target.value)}
+                                                            className="cost-input"
+                                                            placeholder="Estimated"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <input
+                                                            type="number"
+                                                            value={item.actualValue || ''}
+                                                            onChange={(e) => handleCostChange(category, key, 'actualValue', e.target.value)}
+                                                            className={`cost-input ${hasActual ? 'has-actual' : ''}`}
+                                                            placeholder="Actual"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div className="variance-display">
+                                                        {hasActual && variance !== 0 && (
+                                                            <div className={`variance-${variance > 0 ? 'positive' : 'negative'}`}>
+                                                                {variance > 0 ? '+' : ''}{variance.toFixed(1)}%
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <input
+                                                            type="range"
+                                                            min={item.min || 0}
+                                                            max={item.max || item.value * 2}
+                                                            value={item.value || 0}
+                                                            onChange={(e) => handleCostChange(category, key, 'value', e.target.value)}
+                                                            className="cost-slider"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <button 
+                                                            className="action-btn tooltip"
+                                                            data-tooltip="View historical data"
+                                                            onClick={() => {
+                                                                // Show historical data modal
+                                                                console.log('Historical data for', item.name);
+                                                            }}
+                                                        >
+                                                            📊
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                
-                                                <div>
-                                                    <input
-                                                        type="number"
-                                                        value={item.actualValue || ''}
-                                                        onChange={(e) => handleCostChange(category, key, 'actualValue', e.target.value)}
-                                                        className={`cost-input ${hasActual ? 'has-actual' : ''}`}
-                                                        placeholder="Actual"
-                                                    />
-                                                </div>
-                                                
-                                                <div className="variance-display">
-                                                    {hasActual && variance !== 0 && (
-                                                        <div className={`variance-${variance > 0 ? 'positive' : 'negative'}`}>
-                                                            {variance > 0 ? '+' : ''}{variance.toFixed(1)}%
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                <div>
-                                                    <input
-                                                        type="range"
-                                                        min={item.min || 0}
-                                                        max={item.max || item.value * 2}
-                                                        value={item.value || 0}
-                                                        onChange={(e) => handleCostChange(category, key, 'value', e.target.value)}
-                                                        className="cost-slider"
-                                                    />
-                                                </div>
-                                                
-                                                <div>
-                                                    <button 
-                                                        className="action-btn tooltip"
-                                                        data-tooltip="View historical data"
-                                                        onClick={() => {
-                                                            // Show historical data modal
-                                                            console.log('Historical data for', item.name);
-                                                        }}
-                                                    >
-                                                        📊
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })
+                                    )}
                                 </div>
                             </div>
                         );
