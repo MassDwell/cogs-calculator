@@ -1506,8 +1506,285 @@
             return ((recent - previous) / previous * 100);
         }
 
-        // Historical projects data - starts empty
-        const mockHistoricalProjects = [];
+        // Historical projects data - includes 48 Blue Gill Lane
+        const mockHistoricalProjects = [
+            {
+                id: 'bluegill_48',
+                name: '48 Blue Gill Lane Plymouth',
+                model: 'classic',
+                completedDate: '2026-02-27',
+                estimatedCost: 165190,
+                actualCost: 92436,
+                margin: 87564,
+                marginPercent: 48.6,
+                status: 'completed'
+            }
+        ];
+
+        // 48 Blue Gill Lane Plymouth actual data from Excel
+        const blueGillProject = {
+            id: 'bluegill_48',
+            name: '48 Blue Gill Lane Plymouth',
+            model: 'classic',
+            costs: {
+                structure: {
+                    steelMaterial: { 
+                        value: 21850, 
+                        actualValue: 17220,
+                        min: 15000, 
+                        max: 30000, 
+                        unit: '$38/sqft × 575 - snow removal, rework, inspection',
+                        name: 'Steel Material + Labor',
+                        category: 'Material',
+                        leadTime: 7
+                    }
+                },
+                electrical: {
+                    electricalPackage: { 
+                        value: 14000, 
+                        actualValue: 13000,
+                        min: 12000, 
+                        max: 16000, 
+                        unit: 'Luis - on contract',
+                        name: 'Electrical Package',
+                        category: 'Systems',
+                        leadTime: 5
+                    }
+                },
+                hvac: {
+                    miniSplitSystem: { 
+                        value: 5000, 
+                        actualValue: null,
+                        min: 4000,
+                        max: 7000,
+                        unit: 'Waiting on 2 estimates',
+                        name: 'Mini Split HVAC System',
+                        category: 'Systems',
+                        leadTime: 10
+                    }
+                },
+                roofing: {
+                    roofingComplete: { 
+                        value: 4959, 
+                        actualValue: 3204,
+                        min: 3000, 
+                        max: 6000, 
+                        unit: 'Done - 1 day work',
+                        name: 'Roofing Complete',
+                        category: 'Material',
+                        leadTime: 5
+                    }
+                },
+                exterior: {
+                    siding: {
+                        value: 4000,
+                        actualValue: 5530,
+                        min: 3000,
+                        max: 6000,
+                        unit: 'Labor estimated',
+                        name: 'Exterior Siding',
+                        category: 'Material',
+                        leadTime: 7
+                    },
+                    windows: {
+                        value: 4050,
+                        actualValue: 1316,
+                        min: 3000,
+                        max: 5000,
+                        unit: 'Done - 8 hours work',
+                        name: 'Windows',
+                        category: 'Components',
+                        leadTime: 14
+                    },
+                    exteriorDoors: {
+                        value: 1825,
+                        actualValue: 1898,
+                        min: 1200,
+                        max: 2500,
+                        unit: 'Done - 8 hours work',
+                        name: 'Exterior Doors',
+                        category: 'Components',
+                        leadTime: 10
+                    }
+                },
+                interior: {
+                    flooring: {
+                        value: 4456,
+                        actualValue: 6000,
+                        min: 3500,
+                        max: 6000,
+                        unit: 'Interior flooring complete',
+                        name: 'Interior Flooring',
+                        category: 'Material',
+                        leadTime: 10
+                    },
+                    doorsAndTrim: {
+                        value: 3000,
+                        actualValue: 8300,
+                        min: 2500,
+                        max: 4000,
+                        unit: 'Baseboard, doors, trim, cabinet, closet',
+                        name: 'Interior Doors & Trim',
+                        category: 'Material',
+                        leadTime: 7
+                    },
+                    paint: {
+                        value: 13369,
+                        actualValue: 3500,
+                        min: 3000,
+                        max: 15000,
+                        unit: 'DoCarmo - on contract',
+                        name: 'Interior Paint',
+                        category: 'Labor',
+                        leadTime: 3
+                    },
+                    drywall: {
+                        value: 13369,
+                        actualValue: 5500,
+                        min: 4000,
+                        max: 15000,
+                        unit: 'Marreco - on contract',
+                        name: 'Drywall',
+                        category: 'Labor',
+                        leadTime: 5
+                    }
+                },
+                kitchen: {
+                    kitchen: { 
+                        value: 8775, 
+                        actualValue: 5000,
+                        min: 4000, 
+                        max: 10000, 
+                        unit: 'Steve paid',
+                        name: 'Kitchen Complete',
+                        category: 'Components',
+                        leadTime: 21
+                    },
+                    appliances: {
+                        value: 4488,
+                        actualValue: 5081,
+                        min: 3500,
+                        max: 6000,
+                        unit: 'LG appliances - Steve paid',
+                        name: 'Kitchen Appliances',
+                        category: 'Components',
+                        leadTime: 14
+                    }
+                },
+                bathroom: {
+                    showerTile: {
+                        value: 1400,
+                        actualValue: 4000,
+                        min: 1200,
+                        max: 2000,
+                        unit: 'Nilo - on contract',
+                        name: 'Shower/Tile',
+                        category: 'Components',
+                        leadTime: 10
+                    }
+                },
+                plumbing: {
+                    plumbingComplete: {
+                        value: 14100,
+                        actualValue: 14100,
+                        min: 12000,
+                        max: 16000,
+                        unit: 'Panorama - on contract',
+                        name: 'Plumbing Complete',
+                        category: 'Labor',
+                        leadTime: 5
+                    }
+                },
+                insulation: {
+                    insulationComplete: {
+                        value: 3364,
+                        actualValue: 13603,
+                        min: 3000,
+                        max: 5000,
+                        unit: 'OX Board Exterior + Interior',
+                        name: 'Insulation Complete',
+                        category: 'Material',
+                        leadTime: 3
+                    }
+                },
+                sitework: {
+                    siteworkComplete: {
+                        value: 6500,
+                        actualValue: 8774,
+                        min: 5000,
+                        max: 10000,
+                        unit: 'Site + Corrective work - 7 days',
+                        name: 'Site Work Complete',
+                        category: 'Site Work',
+                        leadTime: 10
+                    }
+                },
+                miscellaneous: {
+                    misc_1640734200000: {
+                        value: 0,
+                        actualValue: 850,
+                        min: 0,
+                        max: 2000,
+                        unit: '5 months of portable estimated',
+                        name: 'Extra - Bathroom',
+                        category: 'Miscellaneous',
+                        leadTime: 0
+                    },
+                    misc_1640734200001: {
+                        value: 0,
+                        actualValue: 1260,
+                        min: 0,
+                        max: 3000,
+                        unit: 'Snow removal',
+                        name: 'Winter Conditions',
+                        category: 'Miscellaneous',
+                        leadTime: 0
+                    },
+                    misc_1640734200002: {
+                        value: 1825,
+                        actualValue: null,
+                        min: 1200,
+                        max: 2500,
+                        unit: 'TBD',
+                        name: 'Lighting',
+                        category: 'Miscellaneous',
+                        leadTime: 7
+                    }
+                }
+            },
+            listPrice: 180000,
+            includeDeck: false, // Not in actual data
+            totalCogs: 165190,
+            actualTotalCogs: 92436,
+            margin: 87564,
+            marginPercent: 48.6,
+            status: 'completed',
+            lastModified: '2026-02-27T19:50:00.000Z',
+            createdBy: 'Steve Vettori',
+            miscItems: [
+                {
+                    id: 1640734200000,
+                    name: 'Extra - Bathroom',
+                    description: '5 months of portable estimated',
+                    value: 0,
+                    actualValue: 850
+                },
+                {
+                    id: 1640734200001,
+                    name: 'Winter Conditions', 
+                    description: 'Snow removal',
+                    value: 0,
+                    actualValue: 1260
+                },
+                {
+                    id: 1640734200002,
+                    name: 'Lighting',
+                    description: 'TBD',
+                    value: 1825,
+                    actualValue: null
+                }
+            ]
+        };
 
         // Main Component
         function CompleteEnhancedCogsCalculator() {
@@ -1520,7 +1797,7 @@
             const [projectName, setProjectName] = useState('');
             const [currentProjectId, setCurrentProjectId] = useState(null);
             const [activeTab, setActiveTab] = useState('calculator');
-            const [savedProjects, setSavedProjects] = useState([]);
+            const [savedProjects, setSavedProjects] = useState([blueGillProject]);
             const [loading, setLoading] = useState(false);
             const [showSaveModal, setShowSaveModal] = useState(false);
             const [alerts, setAlerts] = useState([]);
