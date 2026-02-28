@@ -1485,42 +1485,8 @@
             return ((recent - previous) / previous * 100);
         }
 
-        // Mock historical projects data
-        const mockHistoricalProjects = [
-            {
-                id: 1,
-                name: '48 Blue Gill Lane Plymouth',
-                model: 'classic',
-                completedDate: '2026-02-15',
-                estimatedCost: 165000,
-                actualCost: 172300,
-                margin: 7700,
-                marginPercent: 4.5,
-                status: 'completed'
-            },
-            {
-                id: 2,
-                name: 'Harbor View ADU',
-                model: 'essential',
-                completedDate: '2026-01-28',
-                estimatedCost: 128000,
-                actualCost: 124500,
-                margin: 16500,
-                marginPercent: 11.7,
-                status: 'completed'
-            },
-            {
-                id: 3,
-                name: 'Sunset Ridge Project',
-                model: 'prime',
-                completedDate: '2026-01-10',
-                estimatedCost: 240000,
-                actualCost: 253600,
-                margin: 16400,
-                marginPercent: 6.1,
-                status: 'completed'
-            }
-        ];
+        // Historical projects data - starts empty
+        const mockHistoricalProjects = [];
 
         // Main Component
         function CompleteEnhancedCogsCalculator() {
