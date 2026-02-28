@@ -1020,6 +1020,17 @@
                 description: 'Luxury 2-bathroom flagship model',
                 targetMargin: 25
             },
+            custom: {
+                name: 'Custom ADU',
+                sqft: 600,
+                beds: 2,
+                baths: 1,
+                listPrice: 180000,
+                hasDeck: true,
+                description: 'Custom configuration - enter your own specs',
+                targetMargin: 20,
+                isCustom: true
+            },
         };
 
         // Comprehensive supplier database
@@ -1051,11 +1062,19 @@
         };
 
         // Complete cost structure with all categories
-        const getCompleteCosts = (model) => {
+        const getCompleteCosts = (model, customParams = null) => {
             const m = MODELS[model];
-            const sqft = m.sqft;
-            const baths = m.baths;
-            const beds = m.beds;
+            let sqft, baths, beds;
+            
+            if (model === 'custom' && customParams) {
+                sqft = customParams.sqft;
+                baths = customParams.baths;
+                beds = customParams.beds;
+            } else {
+                sqft = m.sqft;
+                baths = m.baths;
+                beds = m.beds;
+            }
             
             return {
                 structure: {
@@ -1503,6 +1522,12 @@
             const [loading, setLoading] = useState(false);
             const [showSaveModal, setShowSaveModal] = useState(false);
             const [alerts, setAlerts] = useState([]);
+            
+            // Custom model state
+            const [customSqft, setCustomSqft] = useState(600);
+            const [customBeds, setCustomBeds] = useState(2);
+            const [customBaths, setCustomBaths] = useState(1);
+            const [customPrice, setCustomPrice] = useState(180000);
 
             // Historical data simulation
             const [historicalProjects, setHistoricalProjects] = useState(mockHistoricalProjects);
@@ -1517,8 +1542,15 @@
             // Model change handler
             const handleModelChange = useCallback((model) => {
                 setSelectedModel(model);
-                setCosts(getCompleteCosts(model));
-                setListPrice(MODELS[model].listPrice);
+                
+                if (model === 'custom') {
+                    // For custom model, use current custom values
+                    setCosts(getCompleteCosts(model, { sqft: customSqft, beds: customBeds, baths: customBaths }));
+                    setListPrice(customPrice);
+                } else {
+                    setCosts(getCompleteCosts(model));
+                    setListPrice(MODELS[model].listPrice);
+                }
                 setIncludeDeck(MODELS[model].hasDeck);
                 
                 // Add alert for model change
@@ -1527,7 +1559,7 @@
                     type: 'success',
                     message: `Switched to ${MODELS[model].name} - costs updated automatically`
                 }]);
-            }, []);
+            }, [customSqft, customBeds, customBaths, customPrice]);
 
             // Cost change handler
             const handleCostChange = useCallback((category, itemKey, field, newValue) => {
@@ -1557,6 +1589,44 @@
                     }
                 }
             }, [costs]);
+
+            // Custom model handlers
+            const handleCustomSqftChange = useCallback((newSqft) => {
+                const sqft = parseInt(newSqft) || 600;
+                setCustomSqft(sqft);
+                if (selectedModel === 'custom') {
+                    setCosts(getCompleteCosts('custom', { sqft, beds: customBeds, baths: customBaths }));
+                    setAlerts(prev => [...prev, {
+                        id: Date.now(),
+                        type: 'success',
+                        message: `Custom model updated to ${sqft} sqft - costs recalculated`
+                    }]);
+                }
+            }, [selectedModel, customBeds, customBaths]);
+
+            const handleCustomBedsChange = useCallback((newBeds) => {
+                const beds = parseInt(newBeds) || 1;
+                setCustomBeds(beds);
+                if (selectedModel === 'custom') {
+                    setCosts(getCompleteCosts('custom', { sqft: customSqft, beds, baths: customBaths }));
+                }
+            }, [selectedModel, customSqft, customBaths]);
+
+            const handleCustomBathsChange = useCallback((newBaths) => {
+                const baths = parseInt(newBaths) || 1;
+                setCustomBaths(baths);
+                if (selectedModel === 'custom') {
+                    setCosts(getCompleteCosts('custom', { sqft: customSqft, beds: customBeds, baths }));
+                }
+            }, [selectedModel, customSqft, customBeds]);
+
+            const handleCustomPriceChange = useCallback((newPrice) => {
+                const price = parseInt(newPrice.replace(/[^0-9]/g, '')) || 0;
+                setCustomPrice(price);
+                if (selectedModel === 'custom') {
+                    setListPrice(price);
+                }
+            }, [selectedModel]);
 
             // Calculate comprehensive totals
             const totals = useMemo(() => {
@@ -1671,7 +1741,14 @@
                         marginPercent,
                         status: projectStatus,
                         lastModified: new Date().toISOString(),
-                        createdBy: 'Steve Vettori'
+                        createdBy: 'Steve Vettori',
+                        // Save custom model parameters if it's a custom model
+                        ...(selectedModel === 'custom' && {
+                            customSqft,
+                            customBeds,
+                            customBaths,
+                            customPrice
+                        })
                     };
 
                     if (currentProjectId) {
@@ -1714,6 +1791,14 @@
                 setProjectName(project.name);
                 setProjectStatus(project.status);
                 setCurrentProjectId(project.id);
+                
+                // Load custom model parameters if it's a custom model
+                if (project.model === 'custom' && project.customSqft) {
+                    setCustomSqft(project.customSqft);
+                    setCustomBeds(project.customBeds);
+                    setCustomBaths(project.customBaths);
+                    setCustomPrice(project.customPrice);
+                }
                 
                 setAlerts(prev => [...prev, {
                     id: Date.now(),
@@ -1768,8 +1853,18 @@
                                 >
                                     <div className="model-name">{model.name}</div>
                                     <div className="model-details">
-                                        <span>{model.sqft} sqft • {model.beds}bd/{model.baths}ba</span>
-                                        <span className="model-price">{formatCurrency(model.listPrice)}</span>
+                                        <span>
+                                            {key === 'custom' && selectedModel === 'custom' ? 
+                                                `${customSqft} sqft • ${customBeds}bd/${customBaths}ba` :
+                                                `${model.sqft} sqft • ${model.beds}bd/${model.baths}ba`
+                                            }
+                                        </span>
+                                        <span className="model-price">
+                                            {key === 'custom' && selectedModel === 'custom' ? 
+                                                formatCurrency(customPrice) :
+                                                formatCurrency(model.listPrice)
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -1787,6 +1882,81 @@
                                 ))}
                             </select>
                         </div>
+
+                        {selectedModel === 'custom' && (
+                            <div style={{ marginTop: '20px', padding: '16px', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', borderRadius: '8px', border: '1px solid #3b82f6' }}>
+                                <h4 style={{ color: '#1d4ed8', marginBottom: '16px', fontWeight: '700' }}>Custom ADU Specifications</h4>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                                            Square Footage
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={customSqft}
+                                            onChange={(e) => handleCustomSqftChange(e.target.value)}
+                                            style={{ width: '100%', padding: '8px 12px', border: '2px solid #3b82f6', borderRadius: '6px', fontSize: '14px' }}
+                                            placeholder="600"
+                                            min="200"
+                                            max="2000"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                                            Selling Price
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formatCurrency(customPrice)}
+                                            onChange={(e) => handleCustomPriceChange(e.target.value)}
+                                            style={{ width: '100%', padding: '8px 12px', border: '2px solid #3b82f6', borderRadius: '6px', fontSize: '14px' }}
+                                            placeholder="180000"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                                            Bedrooms
+                                        </label>
+                                        <select
+                                            value={customBeds}
+                                            onChange={(e) => handleCustomBedsChange(e.target.value)}
+                                            style={{ width: '100%', padding: '8px 12px', border: '2px solid #3b82f6', borderRadius: '6px', fontSize: '14px', background: 'white' }}
+                                        >
+                                            <option value={1}>1 Bedroom</option>
+                                            <option value={2}>2 Bedrooms</option>
+                                            <option value={3}>3 Bedrooms</option>
+                                            <option value={4}>4 Bedrooms</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                                            Bathrooms
+                                        </label>
+                                        <select
+                                            value={customBaths}
+                                            onChange={(e) => handleCustomBathsChange(e.target.value)}
+                                            style={{ width: '100%', padding: '8px 12px', border: '2px solid #3b82f6', borderRadius: '6px', fontSize: '14px', background: 'white' }}
+                                        >
+                                            <option value={1}>1 Bathroom</option>
+                                            <option value={1.5}>1.5 Bathrooms</option>
+                                            <option value={2}>2 Bathrooms</option>
+                                            <option value={2.5}>2.5 Bathrooms</option>
+                                            <option value={3}>3 Bathrooms</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '12px', textAlign: 'center' }}>
+                                    Costs will automatically recalculate based on your custom specifications
+                                </div>
+                            </div>
+                        )}
 
                         {MODELS[selectedModel].hasDeck && (
                             <div style={{ marginTop: '16px', padding: '12px', background: '#f9fafb', borderRadius: '6px' }}>
