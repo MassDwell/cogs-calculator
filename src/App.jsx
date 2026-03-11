@@ -605,8 +605,9 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-                  <span className="text-blue-600">MassDwell</span> COGS Calculator
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate flex items-center gap-3">
+                  <img src="/massdwell-logo.jpg" alt="MassDwell Solutions" style={{ height: "48px", objectFit: "contain" }} />
+                  COGS Calculator
                 </h1>
                 {projectName && (
                   <p className="text-sm text-gray-500 mt-0.5 truncate">
