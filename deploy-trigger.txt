@@ -1,2 +1,0 @@
-Deployment trigger: 2026-02-27 17:55:00 EST
-Force redeploy of enhanced COGS calculator with variance tracking
