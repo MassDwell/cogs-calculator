@@ -18,9 +18,8 @@ function mapFromDb(row) {
     includeDeck: row.include_deck,
     totalCogs: row.total_cogs,
     margin: row.margin,
-    status: row.status,
+    status: row.total_cogs > 0 ? 'active' : 'estimated',
     createdAt: row.created_at,
-    updatedAt: row.updated_at,
   }
 }
 
@@ -33,7 +32,6 @@ function mapToDb(project) {
     include_deck: project.includeDeck,
     total_cogs: project.totalCogs,
     margin: project.margin,
-    status: project.status || 'estimated',
   }
 }
 
@@ -271,7 +269,6 @@ function App() {
         const { data, error } = await supabase
           .from('cogs_projects')
           .select('*')
-          .not('status', 'eq', 'archived')
           .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -439,7 +436,6 @@ function App() {
       includeDeck,
       totalCogs: totals.actualGrandTotal,
       margin,
-      status: projectStatus,
     }
 
     try {
@@ -448,7 +444,7 @@ function App() {
       if (currentProjectId) {
         const { data, error } = await supabase
           .from('cogs_projects')
-          .update({ ...dbData, updated_at: new Date().toISOString() })
+          .update({ ...dbData })
           .eq('id', currentProjectId)
           .select()
           .single()
@@ -484,7 +480,7 @@ function App() {
     try {
       const { error } = await supabase
         .from('cogs_projects')
-        .update({ status: 'archived', updated_at: new Date().toISOString() })
+        .delete()
         .eq('id', projectId)
 
       if (error) throw error
